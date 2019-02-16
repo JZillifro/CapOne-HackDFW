@@ -23,6 +23,12 @@ csrf = CSRFProtect(app)
 #     'username': secrets['mlab_username'],
 #     'password': secrets['mlab_password']
 # }
+app.config['MONGODB_SETTINGS'] = {
+    'db': 'co-manager',
+    'host': secrets['mlab_host'],
+    'username': secrets['mlab_username'],
+    'password': secrets['mlab_password']
+}
 db = MongoEngine(app)
 
 from comapi.users.views import users_blueprint
