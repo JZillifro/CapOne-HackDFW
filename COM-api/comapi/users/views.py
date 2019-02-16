@@ -1,5 +1,6 @@
 import json
 import time
+import requests
 from flask import jsonify, Response
 # from comapi.models import User
 from flask import Blueprint, flash, jsonify, redirect, request, session, url_for
@@ -10,8 +11,41 @@ users_blueprint = Blueprint('users',
 
 @users_blueprint.route('/_landing')
 def get_landing_data():
-    result = ['wow', 'cool']
-    return jsonify(result)
+    customerId = '5c6858f86759394351bec029'
+    apiKey = '8a1c3fd4fe7e739dd94b39699dd652cc'
+
+    url = 'http://api.reimaginebanking.com/customers/{}/accounts?key={}'.format(customerId,apiKey)
+    payload = {
+    "type": "Checking",
+    "nickname": "test",
+    "rewards": 10000,
+    "balance": 1500,	
+    }
+    # Create a Savings Account
+    response = requests.get( 
+        url, 
+        data=json.dumps(payload),
+        headers={'content-type':'application/json'},
+    )
+    return response.text
+    #result = ['wow', 'cool']
+    #return jsonify(result)
+
+@users_blueprint.route('/_customers')
+def get_customer_data():
+    customerId = '5c6858f86759394351bec029'
+    apiKey = '8a1c3fd4fe7e739dd94b39699dd652cc'
+
+    url = 'http://api.reimaginebanking.com/accounts?type=Savings&key=8a1c3fd4fe7e739dd94b39699dd652cc'
+
+    # Get accounts
+    response = requests.get( 
+        url, 
+        headers={'content-type':'application/json'},
+    )
+    return response.text
+    #result = ['wow', 'cool']
+    #return jsonify(result)
 
 # @posts_blueprint.route('/forum/<id>')
 # def get_forum_data(id):
