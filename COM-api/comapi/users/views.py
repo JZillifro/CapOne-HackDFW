@@ -2,7 +2,7 @@ import json
 import time
 import requests
 from flask import jsonify, Response
-# from comapi.models import User
+from comapi.models import User
 from flask import Blueprint, flash, jsonify, redirect, request, session, url_for
 
 users_blueprint = Blueprint('users',
@@ -16,22 +16,14 @@ def get_landing_data():
 
     url = 'http://api.reimaginebanking.com/customers/{}/accounts?key={}'.format(customerId,apiKey)
     payload = {
-    "type": "Checking",
-    "nickname": "test",
-    "rewards": 10000,
-<<<<<<< HEAD
-    "balance": 1500,
+        "type": "Checking",
+        "nickname": "test",
+        "rewards": 10000,
+        "balance": 1500,
     }
     # Create a Savings Account
-    response = requests.get(
+    response = requests.post(
         url,
-=======
-    "balance": 1500,	
-    }
-    # Create a Savings Account
-    response = requests.get( 
-        url, 
->>>>>>> b2384e7a3855c04ca99f3ac67f3d95bd4844557a
         data=json.dumps(payload),
         headers={'content-type':'application/json'},
     )
@@ -39,24 +31,65 @@ def get_landing_data():
     #result = ['wow', 'cool']
     #return jsonify(result)
 
-@users_blueprint.route('/_customers')
-def get_customer_data():
+@users_blueprint.route('/_loadDB')
+def load_database():
     customerId = '5c6858f86759394351bec029'
     apiKey = '8a1c3fd4fe7e739dd94b39699dd652cc'
 
-    url = 'http://api.reimaginebanking.com/accounts?type=Savings&key=8a1c3fd4fe7e739dd94b39699dd652cc'
-
-    # Get accounts
-<<<<<<< HEAD
+    #url = 'http://api.reimaginebanking.com/customers/{}/accounts?key={}'.format(customerId, apiKey)
+    url = 'http://api.reimaginebanking.com/customers?key={}'.format(apiKey)
+     # Get accounts
     response = requests.get(
         url,
-=======
-    response = requests.get( 
-        url, 
->>>>>>> b2384e7a3855c04ca99f3ac67f3d95bd4844557a
         headers={'content-type':'application/json'},
     )
-    return response.text
+
+    customers = json.loads(response.text)
+    for customer in customers:
+        print(customer["first_name"])
+        url = 'http://api.reimaginebanking.com/customers/{}/accounts?key={}'.format(customer["_id"], apiKey)
+        actResponse = requests.get(
+            url,
+            headers={'content-type':'application/json'},
+        )
+        accts = {}
+
+        accounts = json.loads(actResponse.text)
+        for account in accounts:
+            accts[account["type"]] = account
+            print(account["type"])
+        savings2 = 0.0
+        checking2 = 0.0
+        credit2 = 0.0
+        if "Savings" in accts:
+            savings2 = accts["Savings"]["balance"]
+        if "Checking" in accts:
+            credit2 = accts["Checking"]["balance"]
+        if "Credit Card" in accts:
+            checking2 = accts["Credit Card"]["balance"]
+
+        newCustomer = User(
+            c_id = customer["_id"],
+            name = customer["first_name"] + " " + customer["last_name"],
+            savings = savings2,
+            checking = checking2,
+            credit = credit2,
+            user_limits = 600.0
+        )
+        newCustomer.save()
+        # Post(
+        #             title = request.form.get('title'),
+        #             text = request.form.get('text'),
+        #             image = request.form.get('image'),
+        #             f_ref = request.form.get('f_ref')
+        #
+        #    )
+    print("Done.")
+    #customers = json.loads*response.)
+
+    return jsonify(customers)
+    #result = ['wow', 'cool']
+    #return jsonify(result)
     #result = ['wow', 'cool']
     #return jsonify(result)
 
