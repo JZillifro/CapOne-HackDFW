@@ -1,3 +1,6 @@
 {
+  "mlab_host": "mongodb://ds237955.mlab.com:37955/co-manager",
+  "mlab_username": "pmpurifoy",
+  "mlab_password": "password1",
   "BASE_FE_URL": "http://localhost:3000/"
 }

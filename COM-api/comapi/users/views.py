@@ -1,17 +1,105 @@
 import json
 import time
+import requests
 from flask import jsonify, Response
-# from comapi.models import User
+from comapi.models import User
 from flask import Blueprint, flash, jsonify, redirect, request, session, url_for
 
 users_blueprint = Blueprint('users',
                                __name__,
                                url_prefix='/users')
 
-@users_blueprint.route('/_landing')
-def get_landing_data():
-    result = ['wow', 'cool']
-    return jsonify(result)
+@users_blueprint.route('/_createUser')
+def create_user():
+    customerId = '5c6858f86759394351bec029'
+    apiKey = '8a1c3fd4fe7e739dd94b39699dd652cc'
+
+    url = 'http://api.reimaginebanking.com/customers/{}/accounts?key={}'.format(customerId,apiKey)
+    payload = {
+        "type": "Checking",
+        "nickname": "test",
+        "rewards": 10000,
+        "balance": 1500,
+    }
+    # Create a Savings Account
+    response = requests.post(
+        url,
+        data=json.dumps(payload),
+        headers={'content-type':'application/json'},
+    )
+    return response.text
+    #result = ['wow', 'cool']
+    #return jsonify(result)
+
+@users_blueprint.route('/_loadDB')
+def load_database():
+    customerId = '5c6858f86759394351bec029'
+    apiKey = '8a1c3fd4fe7e739dd94b39699dd652cc'
+
+    #url = 'http://api.reimaginebanking.com/customers/{}/accounts?key={}'.format(customerId, apiKey)
+    url = 'http://api.reimaginebanking.com/customers?key={}'.format(apiKey)
+     # Get accounts
+    response = requests.get(
+        url,
+        headers={'content-type':'application/json'},
+    )
+
+    customers = json.loads(response.text)
+    for customer in customers:
+        print(customer["first_name"])
+        url = 'http://api.reimaginebanking.com/customers/{}/accounts?key={}'.format(customer["_id"], apiKey)
+        actResponse = requests.get(
+            url,
+            headers={'content-type':'application/json'},
+        )
+        accts = {}
+
+        accounts = json.loads(actResponse.text)
+        for account in accounts:
+            accts[account["type"]] = account
+            print(account["type"])
+        savings2 = 0.0
+        checking2 = 0.0
+        credit2 = 0.0
+        if "Savings" in accts:
+            savings2 = accts["Savings"]["balance"]
+        if "Checking" in accts:
+            credit2 = accts["Checking"]["balance"]
+        if "Credit Card" in accts:
+            checking2 = accts["Credit Card"]["balance"]
+
+        newCustomer = User(
+            c_id = customer["_id"],
+            name = customer["first_name"] + " " + customer["last_name"],
+            savings = savings2,
+            checking = checking2,
+            credit = credit2,
+            user_limits = 600.0,
+            password = "password1"
+        )
+        newCustomer.save()
+        # Post(
+        #             title = request.form.get('title'),
+        #             text = request.form.get('text'),
+        #             image = request.form.get('image'),
+        #             f_ref = request.form.get('f_ref')
+        #
+        #    )
+    print("Done.")
+    #customers = json.loads*response.)
+
+    return jsonify(customers)
+    #result = ['wow', 'cool']
+    #return jsonify(result)
+    #result = ['wow', 'cool']
+    #return jsonify(result)
+
+@users_blueprint.route('/_login')
+def login_credentials():
+    user = User.objects.get(name=request.form["username"], password=request.form["password"])
+    return jsonify(user)
+
+
 
 # @posts_blueprint.route('/forum/<id>')
 # def get_forum_data(id):
