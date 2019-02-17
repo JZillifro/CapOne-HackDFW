@@ -9,6 +9,8 @@ users_blueprint = Blueprint('users',
                                __name__,
                                url_prefix='/users')
 
+current_user = None
+
 @users_blueprint.route('/_createUser')
 def create_user():
     customerId = '5c6858f86759394351bec029'
@@ -58,15 +60,18 @@ def load_database():
         for account in accounts:
             accts[account["type"]] = account
             print(account["type"])
-        savings2 = 0.0
-        checking2 = 0.0
-        credit2 = 0.0
+        savings2 = ["id", 0.0]
+        checking2 = ["id", 0.0]
+        credit2 = ["id", 0.0]
         if "Savings" in accts:
-            savings2 = accts["Savings"]["balance"]
+            savings2[0] = accts["Savings"]["_id"]
+            savings2[1] = accts["Savings"]["balance"]
         if "Checking" in accts:
-            credit2 = accts["Checking"]["balance"]
+            checking2[0] = accts["Checking"]["_id"]
+            checking2[1] = accts["Checking"]["balance"]
         if "Credit Card" in accts:
-            checking2 = accts["Credit Card"]["balance"]
+            credit2[0] = accts["Credit Card"]["_id"]
+            credit2[1] = accts["Credit Card"]["balance"]
 
         newCustomer = User(
             c_id = customer["_id"],
@@ -77,29 +82,43 @@ def load_database():
             user_limits = 600.0,
             password = "password1"
         )
-        newCustomer.save()
-        # Post(
-        #             title = request.form.get('title'),
-        #             text = request.form.get('text'),
-        #             image = request.form.get('image'),
-        #             f_ref = request.form.get('f_ref')
-        #
-        #    )
-    print("Done.")
-    #customers = json.loads*response.)
 
+        newCustomer.save()
     return jsonify(customers)
-    #result = ['wow', 'cool']
-    #return jsonify(result)
-    #result = ['wow', 'cool']
-    #return jsonify(result)
 
 @users_blueprint.route('/_login')
 def login_credentials():
-    user = User.objects.get(name=request.form["username"], password=request.form["password"])
-    return jsonify(user)
+    global current_user
+    #user = User.objects.get(name=request.form["username"], password=request.form["password"])
+    user = User.objects.get(name='Jacques Champlin', password='password1')
+    current_user = user
+    return jsonify(current_user)
 
+@users_blueprint.route('/_user-limit')
+def set_user_limit():
+    global current_user
+    #current_user['user_limits'] = request.form["value"]
+    current_user['user_limits'] = 2000
+    current_user.save()
+    return jsonify(current_user)
 
+@users_blueprint.route('/_user-bills')
+def get_leftover_cash():
+    global current_user
+    apiKey = '8a1c3fd4fe7e739dd94b39699dd652cc'
+
+    balance = current_user['checking'][1]
+    print(balance)
+    url = 'http://api.reimaginebanking.com/accounts/{}/bills?key={}'.format(current_user['checking'][0], apiKey)
+    billResponse = requests.get(
+        url,
+        headers={'content-type':'application/json'},
+    )
+    bills = json.loads(billResponse.text)
+    for bill in bills:
+        balance = balance - bill['payment_amount']
+    current_user['checking'][1] = balance
+    return jsonify(current_user)
 
 # @posts_blueprint.route('/forum/<id>')
 # def get_forum_data(id):
