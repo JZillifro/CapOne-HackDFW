@@ -1,10 +1,12 @@
 import React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { Platform, StatusBar, StyleSheet, View, AppRegistry } from 'react-native';
 import { AppLoading, Asset, Font, Icon } from 'expo';
 import AppNavigator from './navigation/AppNavigator';
 import { ThemeProvider } from 'react-native-elements';
 import PageHeader from './components/PageHeader';
 import { BASE_API_URL } from './constants.js';
+
+AppRegistry.registerComponent('ReactNativeAuth', () => App);
 
 export default class App extends React.Component {
   state = {
@@ -13,15 +15,15 @@ export default class App extends React.Component {
   };
 
   logIn(user, pass) {
-    fetch(`${BASE_API_URL}/users/login`, {
+    fetch(`${BASE_API_URL}/users/_login`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        user: user,
-        pass: pass
+        username: user,
+        password: pass
       }),
     }).then((response) => response.json())
         .then((responseJson) => {
@@ -49,7 +51,7 @@ export default class App extends React.Component {
           <ThemeProvider>
             <PageHeader title="C.O. Manage"/>
             {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-            <AppNavigator/>
+            <AppNavigator handleLogin={this.login()}/>
           </ThemeProvider>
         </View>
       );

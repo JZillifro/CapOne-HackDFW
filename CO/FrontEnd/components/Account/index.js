@@ -6,7 +6,8 @@ import PageHeader from '../PageHeader';
 
 export default class Account extends React.Component {
   state = {
-    data: null
+    username: null,
+    password: null
   };
 
   render() {
@@ -22,14 +23,16 @@ export default class Account extends React.Component {
               placeholder='username'
               leftIcon={{ type: 'font-awesome', name: 'user' }}
               style={styles.inp}
+              onChangeText={(username) => this.setState({username})}
               />
             <Input
               placeholder='password'
               leftIcon={{ type: 'font-awesome', name: 'lock' }}
               style={styles.inp}
+              onChangeText={(password) => this.setState({password})}
               />
             <View style={styles.inp}>
-              <Button title="Log in"/>
+              <Button title="Log in" onClick={() => this.props.handleLogin(this.state.username, this.state.password)}/>
             </View>
           </View>
         </View>
