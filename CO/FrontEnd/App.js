@@ -2,11 +2,37 @@ import React from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { AppLoading, Asset, Font, Icon } from 'expo';
 import AppNavigator from './navigation/AppNavigator';
+import { ThemeProvider } from 'react-native-elements';
+import PageHeader from './components/PageHeader';
+import { BASE_API_URL } from './constants.js';
 
 export default class App extends React.Component {
   state = {
     isLoadingComplete: false,
+    user: null
   };
+
+  logIn(user, pass) {
+    fetch(`${BASE_API_URL}/users/login`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user: user,
+        pass: pass
+      }),
+    }).then((response) => response.json())
+        .then((responseJson) => {
+          this.setState({
+            user: responseJson
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+  }
 
   render() {
     if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
@@ -20,8 +46,11 @@ export default class App extends React.Component {
     } else {
       return (
         <View style={styles.container}>
-          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-          <AppNavigator />
+          <ThemeProvider>
+            <PageHeader title="C.O. Manage"/>
+            {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+            <AppNavigator/>
+          </ThemeProvider>
         </View>
       );
     }
