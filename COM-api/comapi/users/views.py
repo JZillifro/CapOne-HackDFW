@@ -9,8 +9,8 @@ users_blueprint = Blueprint('users',
                                __name__,
                                url_prefix='/users')
 
-@users_blueprint.route('/_landing')
-def get_landing_data():
+@users_blueprint.route('/_createUser')
+def create_user():
     customerId = '5c6858f86759394351bec029'
     apiKey = '8a1c3fd4fe7e739dd94b39699dd652cc'
 
@@ -74,7 +74,8 @@ def load_database():
             savings = savings2,
             checking = checking2,
             credit = credit2,
-            user_limits = 600.0
+            user_limits = 600.0,
+            password = "password1"
         )
         newCustomer.save()
         # Post(
@@ -92,6 +93,13 @@ def load_database():
     #return jsonify(result)
     #result = ['wow', 'cool']
     #return jsonify(result)
+
+@users_blueprint.route('/_login')
+def login_credentials():
+    user = User.objects.get(name=request.form["username"], password=request.form["password"])
+    return jsonify(user)
+
+
 
 # @posts_blueprint.route('/forum/<id>')
 # def get_forum_data(id):

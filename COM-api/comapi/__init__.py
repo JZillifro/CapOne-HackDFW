@@ -41,3 +41,4 @@ for blueprint in blueprints:
     csrf.exempt(blueprint)
     CORS(blueprint)
     app.register_blueprint(blueprint)
+    

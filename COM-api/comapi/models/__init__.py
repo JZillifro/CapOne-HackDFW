@@ -34,3 +34,9 @@ class User(db.Document):
         required = False,
         default = 600.0
     )
+
+    password = db.StringField(
+        required = True,
+        default = "password1"
+    )
+    
