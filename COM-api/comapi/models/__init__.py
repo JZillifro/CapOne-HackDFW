@@ -15,19 +15,19 @@ class User(db.Document):
         default="Gary"
     )
 
-    savings = db.DecimalField(
+    savings = db.ListField(
         required = False,
-        default = 0.0
+        default = ["id", 0.0]
     )
 
-    checking = db.DecimalField(
+    checking = db.ListField(
         required = False,
-        default = 0.0
+        default = ["id", 0.0]
     )
 
-    credit = db.DecimalField(
+    credit = db.ListField(
         required = False,
-        default = 0.0
+        default = ["id", 0.0]
     )
 
     user_limits = db.DecimalField(
@@ -39,4 +39,3 @@ class User(db.Document):
         required = True,
         default = "password1"
     )
-    
