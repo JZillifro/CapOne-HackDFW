@@ -48,7 +48,6 @@ def load_database():
 
     customers = json.loads(response.text)
     for customer in customers:
-        print(customer["first_name"])
         url = 'http://api.reimaginebanking.com/customers/{}/accounts?key={}'.format(customer["_id"], apiKey)
         actResponse = requests.get(
             url,
@@ -59,7 +58,7 @@ def load_database():
         accounts = json.loads(actResponse.text)
         for account in accounts:
             accts[account["type"]] = account
-            print(account["type"])
+
         savings2 = ["id", 0.0]
         checking2 = ["id", 0.0]
         credit2 = ["id", 0.0]
@@ -89,16 +88,16 @@ def load_database():
 @users_blueprint.route('/_login')
 def login_credentials():
     global current_user
-    #user = User.objects.get(name=request.form["username"], password=request.form["password"])
-    user = User.objects.get(name='Jacques Champlin', password='password1')
+    user = User.objects.get(name=request.form["username"], password=request.form["password"])
+    #user = User.objects.get(name='Jacques Champlin', password='password1')
     current_user = user
     return jsonify(current_user)
 
 @users_blueprint.route('/_user-limit')
 def set_user_limit():
     global current_user
-    #current_user['user_limits'] = request.form["value"]
-    current_user['user_limits'] = 2000
+    current_user['user_limits'] = request.form["value"]
+    #current_user['user_limits'] = 500
     current_user.save()
     return jsonify(current_user)
 
@@ -108,7 +107,6 @@ def get_leftover_cash():
     apiKey = '8a1c3fd4fe7e739dd94b39699dd652cc'
 
     balance = current_user['checking'][1]
-    print(balance)
     url = 'http://api.reimaginebanking.com/accounts/{}/bills?key={}'.format(current_user['checking'][0], apiKey)
     billResponse = requests.get(
         url,
@@ -117,7 +115,9 @@ def get_leftover_cash():
     bills = json.loads(billResponse.text)
     for bill in bills:
         balance = balance - bill['payment_amount']
-    current_user['checking'][1] = balance
+
+    current_user['checking'][1] =  balance - current_user['user_limits']
+    current_user.save()
     return jsonify(current_user)
 
 # @posts_blueprint.route('/forum/<id>')
