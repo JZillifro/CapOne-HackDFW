@@ -88,8 +88,8 @@ def load_database():
 @users_blueprint.route('/_login')
 def login_credentials():
     global current_user
-    user = User.objects.get(name=request.form["username"], password=request.form["password"])
-    #user = User.objects.get(name='Jacques Champlin', password='password1')
+    #user = User.objects.get(name=request.form["username"], password=request.form["password"])
+    user = User.objects.get(name='Jacques Champlin', password='password1')
     current_user = user
     return jsonify(current_user)
 
@@ -119,6 +119,18 @@ def get_leftover_cash():
     current_user['checking'][1] =  balance - current_user['user_limits']
     current_user.save()
     return jsonify(current_user)
+	
+@users_blueprint.route('/_user-accounts')
+def get_accounts_balances():
+	global current_user
+	user = User.objects.get(name='Jacques Champlin', password='password1')
+	obj = {}
+	obj['Savings'] = user.savings
+	obj['Checking'] = user.checking
+	obj['Credit'] = user.credit
+	json_data = json.dumps(obj)
+	return json_data
+	
 
 # @posts_blueprint.route('/forum/<id>')
 # def get_forum_data(id):
